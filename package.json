@@ -1,0 +1,20 @@
+{
+  "name": "mealmatch",
+  "version": "1.0.0",
+  "description": "A Zomato-style food delivery app with Bargain Bites and Shared Delivery Pool",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start",
+    "install-all": "npm install && cd client && npm install && cd ../server && npm install",
+    "setup": "npm run install-all && cd server && npm run seed",
+    "test-api": "cd server && curl http://localhost:5000/api/health || echo 'Server not running'"
+  },
+  "keywords": ["food delivery", "react", "node", "mongodb", "socket.io"],
+  "author": "MealMatch Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  }
+}
