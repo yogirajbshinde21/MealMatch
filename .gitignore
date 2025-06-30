@@ -48,12 +48,3 @@ temp/
 
 # Additional files
 .github/
-
-# Deployment files
-.render/
-*.tar.gz
-*.zip
-
-# Production builds
-/client/build
-/server/dist
