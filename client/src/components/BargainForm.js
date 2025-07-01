@@ -20,7 +20,7 @@ const BargainForm = ({ meal, onClose, onSuccess }) => {
 
   useEffect(() => {
     // Initialize socket connection for real-time bargaining
-    const socketUrl = process.env.REACT_APP_API_BASE_URL?.replace('/api', '') || 'https://mealmatch-backend.onrender.com/api';
+    const socketUrl = process.env.REACT_APP_API_BASE_URL?.replace('/api', '') || 'https://mealmatch-backend.onrender.com';
     const newSocket = io(socketUrl);
     setSocket(newSocket);
 

@@ -2026,3 +2026,429 @@ code {
     transform: translateX(100%);
   }
 }
+
+/* Fix navbar dropdown z-index to appear above content */
+.navbar .dropdown-menu {
+  z-index: 1060 !important;
+}
+
+.navbar .dropdown-menu.show {
+  z-index: 1060 !important;
+}
+
+/* Ensure navbar itself has proper z-index */
+.navbar.sticky-top {
+  z-index: 1030;
+}
+
+/* Ensure sticky elements don't interfere with navbar dropdowns */
+.sticky-top {
+  z-index: 1020;
+}
+
+/* Ensure Bootstrap cards don't interfere with dropdowns */
+.card {
+  z-index: auto;
+}
+
+/* Additional dropdown positioning fixes */
+.navbar .nav-item.dropdown {
+  position: relative;
+}
+
+.navbar .dropdown-menu {
+  position: absolute !important;
+  top: 100% !important;
+  left: auto !important;
+  right: 0 !important;
+  transform: none !important;
+}
+
+/* Specific fix for Order Statistics not interfering with dropdown */
+.card.sticky-top {
+  z-index: 1020 !important;
+}
+
+/* Ensure content areas don't interfere with navbar dropdowns */
+.container, .container-fluid {
+  position: relative;
+  z-index: auto;
+}
+
+/* Style dropdown button to look like nav-link */
+.navbar .nav-link.btn-link {
+  color: rgba(255, 255, 255, 0.75) !important;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+}
+
+.navbar .nav-link.btn-link:hover,
+.navbar .nav-link.btn-link:focus {
+  color: rgba(255, 255, 255, 1) !important;
+}
+
+/* ========================================
+   MODERN FOOD DELIVERY WEATHER BANNER
+======================================== */
+
+/* Main Banner Container */
+.modern-food-banner {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  overflow: hidden;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.modern-food-banner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Special Offer Banner */
+.modern-food-banner.special-offer {
+  background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%);
+  border: 2px solid rgba(40, 167, 69, 0.2);
+}
+
+/* Regular Pricing Banner */
+.modern-food-banner.regular-pricing {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 2px solid rgba(108, 117, 125, 0.1);
+}
+
+/* Loading Banner */
+.modern-food-banner.loading-banner {
+  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+  border: 2px solid rgba(33, 150, 243, 0.2);
+}
+
+/* Error Banner */
+.modern-food-banner.error-banner {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffeaa7 100%);
+  border: 2px solid rgba(255, 152, 0, 0.2);
+}
+
+/* Info Banner */
+.modern-food-banner.info-banner {
+  background: linear-gradient(135deg, #e1f5fe 0%, #f0f4c3 100%);
+  border: 2px solid rgba(0, 188, 212, 0.2);
+}
+
+/* Special Offer Header */
+.special-offer-header {
+  background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+  padding: 0.5rem 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.special-offer-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+.offer-badge {
+  color: white;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Banner Content */
+.banner-content {
+  padding: 1.5rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  position: relative;
+}
+
+/* Food Icon Container */
+.food-icon-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 80px;
+}
+
+.food-icon {
+  font-size: 3.5rem;
+  filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.1));
+  transition: all 0.3s ease;
+}
+
+.food-icon.animated {
+  animation: float 3s ease-in-out infinite;
+}
+
+.food-icon.loading {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Floating Food Icons */
+.floating-food-icons {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.floating-icon {
+  position: absolute;
+  font-size: 1.2rem;
+  opacity: 0.3;
+  animation: foodFloat 4s ease-in-out infinite;
+}
+
+.floating-icon.icon-1 {
+  top: -10px;
+  left: -10px;
+  animation-delay: 0s;
+}
+
+.floating-icon.icon-2 {
+  top: -5px;
+  right: -15px;
+  animation-delay: 1s;
+}
+
+.floating-icon.icon-3 {
+  bottom: -10px;
+  left: -5px;
+  animation-delay: 2s;
+}
+
+.floating-icon.icon-4 {
+  bottom: -5px;
+  right: -10px;
+  animation-delay: 3s;
+}
+
+@keyframes foodFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-10px) rotate(5deg);
+    opacity: 0.6;
+  }
+}
+
+/* Banner Text */
+.banner-text {
+  flex: 1;
+}
+
+.banner-title {
+  color: #2c3e50;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.special-offer .banner-title {
+  color: #27ae60;
+}
+
+.banner-subtitle {
+  color: #6c757d;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+/* Banner Info */
+.banner-info {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.location-badge {
+  background: rgba(52, 152, 219, 0.1);
+  color: #3498db;
+  padding: 0.4rem 0.8rem;
+  border-radius: 15px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid rgba(52, 152, 219, 0.2);
+}
+
+.deal-badge {
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 15px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+}
+
+.deal-badge.pulsing {
+  animation: dealPulse 2s ease-in-out infinite;
+}
+
+@keyframes dealPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(243, 156, 18, 0.4);
+  }
+}
+
+/* Discount Progress */
+.discount-progress {
+  padding: 1rem 2rem 1.5rem;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+}
+
+.progress-header {
+  display: flex;
+  justify-content: between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.progress-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #495057;
+}
+
+.progress-value {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.progress-bar-container {
+  height: 8px;
+  background: rgba(108, 117, 125, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  border-radius: 10px;
+  transition: width 1s ease-in-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+.progress-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+/* Animations */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .banner-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+  }
+  
+  .food-icon {
+    font-size: 2.5rem;
+  }
+  
+  .banner-title {
+    font-size: 1.25rem;
+  }
+  
+  .banner-info {
+    justify-content: center;
+  }
+  
+  .discount-progress {
+    padding: 1rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .banner-content {
+    padding: 1rem;
+  }
+  
+  .discount-progress {
+    padding: 0.75rem 1rem 1rem;
+  }
+  
+  .banner-info {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

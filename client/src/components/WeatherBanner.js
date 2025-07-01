@@ -1,34 +1,85 @@
 import React from 'react';
 import { useWeather } from '../context/WeatherContext';
-import { useAuth } from '../context/AuthContext';
 
 const WeatherBanner = () => {
   const { 
-    weather, 
+    weather,            
     discountPercent, 
     loading, 
     error, 
-    getWeatherBanner,
-    getWeatherEmoji,
     currentCity,
-    currentTemp,
     hasDiscount,
     currentCondition
   } = useWeather();
-  
-  const { user } = useAuth();
+
+  // Get food-themed icon based on weather condition
+  const getFoodWeatherIcon = () => {
+    if (!weather?.current) return '🍽️';
+    
+    const condition = currentCondition || weather.current.condition.text.toLowerCase();
+    
+    if (condition.includes('rain') || condition.includes('drizzle')) {
+      return '🥘'; // Hot comfort food
+    } else if (condition.includes('snow') || condition.includes('blizzard')) {
+      return '🍲'; // Warm soup/stew
+    } else if (condition.includes('hot') || condition.includes('sunny')) {
+      return '🥗'; // Fresh salads
+    } else if (condition.includes('cloud') || condition.includes('overcast')) {
+      return '🍜'; // Noodles/warm comfort food
+    } else {
+      return '🍽️'; // General dining
+    }
+  };
+
+  // Get food-delivery focused message
+  const getFoodDeliveryMessage = () => {
+    if (!weather?.current) return 'Smart Pricing Active!';
+    
+    const condition = currentCondition || weather.current.condition.text.toLowerCase();
+    
+    if (condition.includes('rain') || condition.includes('drizzle')) {
+      return 'Rainy Day Special!';
+    } else if (condition.includes('snow') || condition.includes('blizzard')) {
+      return 'Winter Comfort Food!';
+    } else if (condition.includes('hot') || condition.includes('sunny')) {
+      return 'Sunny Day Fresh!';
+    } else if (condition.includes('cloud') || condition.includes('overcast')) {
+      return 'Perfect Comfort Food Weather!';
+    } else {
+      return 'Great Weather for Food Delivery!';
+    }
+  };
+
+  // Get subtitle message
+  const getSubtitleMessage = () => {
+    if (!weather?.current) return 'Enjoy great food with smart pricing';
+    
+    const condition = currentCondition || weather.current.condition.text.toLowerCase();
+    
+    if (condition.includes('rain') || condition.includes('drizzle')) {
+      return 'Perfect weather for hot comfort food delivery';
+    } else if (condition.includes('snow') || condition.includes('blizzard')) {
+      return 'Stay warm with hot meals delivered to your door';
+    } else if (condition.includes('hot') || condition.includes('sunny')) {
+      return 'Beat the heat with fresh meals and cold drinks';
+    } else if (condition.includes('cloud') || condition.includes('overcast')) {
+      return 'Stay cozy indoors while we bring you delicious meals';
+    } else {
+      return 'Perfect weather for enjoying great food at home';
+    }
+  };
 
   // Show loading state
   if (loading) {
     return (
-      <div className="alert alert-light border-0 shadow-sm mb-4" role="alert">
-        <div className="d-flex align-items-center">
-          <div className="spinner-border spinner-border-sm me-3" role="status">
-            <span className="visually-hidden">Loading...</span>
+      <div className="modern-food-banner loading-banner" role="alert">
+        <div className="banner-content">
+          <div className="food-icon-container">
+            <div className="food-icon loading">🍽️</div>
           </div>
-          <div>
-            <h6 className="mb-0">🌤️ Fetching weather data for dynamic pricing...</h6>
-            <small className="text-muted">Please wait while we get current weather conditions</small>
+          <div className="banner-text">
+            <h6 className="banner-title">Checking for special offers...</h6>
+            <small className="banner-subtitle">We're finding the best deals for you based on current conditions</small>
           </div>
         </div>
       </div>
@@ -38,12 +89,14 @@ const WeatherBanner = () => {
   // Show error state with fallback
   if (error) {
     return (
-      <div className="alert alert-warning border-0 shadow-sm mb-4" role="alert">
-        <div className="d-flex align-items-center">
-          <div className="me-3" style={{ fontSize: '1.5rem' }}>⚠️</div>
-          <div>
-            <h6 className="mb-0 fw-bold">Weather service temporarily unavailable</h6>
-            <small className="text-muted">Using standard pricing for now. Weather-based discounts will resume shortly.</small>
+      <div className="modern-food-banner error-banner" role="alert">
+        <div className="banner-content">
+          <div className="food-icon-container">
+            <div className="food-icon">🍽️</div>
+          </div>
+          <div className="banner-text">
+            <h6 className="banner-title">Standard pricing in effect</h6>
+            <small className="banner-subtitle">Great food at regular prices - special weather deals will return soon!</small>
           </div>
         </div>
       </div>
@@ -53,182 +106,82 @@ const WeatherBanner = () => {
   // Don't show banner if no weather data
   if (!weather || !weather.current) {
     return (
-      <div className="alert alert-info border-0 shadow-sm mb-4" role="alert">
-        <div className="d-flex align-items-center">
-          <div className="me-3" style={{ fontSize: '1.5rem' }}>🌍</div>
-          <div>
-            <h6 className="mb-0 fw-bold">Weather-Based Pricing Active!</h6>
-            <small className="text-muted">Set your city in profile to get personalized weather discounts</small>
+      <div className="modern-food-banner info-banner" role="alert">
+        <div className="banner-content">
+          <div className="food-icon-container">
+            <div className="food-icon">🍽️</div>
+          </div>
+          <div className="banner-text">
+            <h6 className="banner-title">Smart Pricing Active!</h6>
+            <small className="banner-subtitle">Set your location in profile to unlock personalized food deals</small>
           </div>
         </div>
       </div>
     );
   }
 
-  const weatherEmoji = getWeatherEmoji();
-  
-  // Determine banner style and colors based on discount
-  const getBannerStyle = () => {
-    if (discountPercent === 15) {
-      return {
-        bgClass: 'alert-success',
-        badgeClass: 'bg-success',
-        borderColor: '#28a745',
-        textColor: '#155724'
-      };
-    } else if (discountPercent === 5) {
-      return {
-        bgClass: 'alert-info',
-        badgeClass: 'bg-info',
-        borderColor: '#17a2b8',
-        textColor: '#0c5460'
-      };
-    } else {
-      return {
-        bgClass: 'alert-light',
-        badgeClass: 'bg-secondary',
-        borderColor: '#6c757d',
-        textColor: '#495057'
-      };
-    }
-  };
-
-  const style = getBannerStyle();
+  const foodIcon = getFoodWeatherIcon();
+  const mainTitle = getFoodDeliveryMessage();
+  const subtitle = getSubtitleMessage();
 
   return (
-    <div 
-      className={`alert ${style.bgClass} border-0 shadow-lg mb-4 position-relative`} 
-      role="alert"
-      style={{ 
-        borderLeft: `5px solid ${style.borderColor}`,
-        background: hasDiscount ? 'linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(40, 167, 69, 0.05))' : undefined
-      }}
-    >
-      {/* Main Weather Display */}
-      <div className="row align-items-center">
-        <div className="col-md-8">
-          <div className="d-flex align-items-center">
-            {/* Large Weather Icon */}
-            <div 
-              className="me-4 text-center"
-              style={{ 
-                fontSize: '3rem',
-                filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.1))'
-              }}
-            >
-              {weatherEmoji}
-            </div>
-            
-            {/* Weather Info */}
-            <div className="flex-grow-1">
-              <div className="d-flex align-items-center mb-2">
-                <h4 className="mb-0 fw-bold" style={{ color: style.textColor }}>
-                  {currentCondition || weather.current.condition.text}
-                </h4>
-                <span className="badge bg-dark ms-3 fs-6">
-                  {currentCity || weather.location?.name || 'Your City'}
-                </span>
-              </div>
-              
-              <div className="d-flex align-items-center gap-3 mb-2">
-                <span className="fs-5 fw-semibold text-primary">
-                  <i className="bi bi-thermometer-half me-1"></i>
-                  {currentTemp || Math.round(weather.current.temp_c)}°C
-                </span>
-                <span className="text-muted">
-                  <i className="bi bi-droplet me-1"></i>
-                  {weather.current.humidity}% humidity
-                </span>
-                <span className="text-muted">
-                  <i className="bi bi-eye me-1"></i>
-                  {weather.current.vis_km || 10}km visibility
-                </span>
-              </div>
-
-              {/* Pricing Impact Message */}
-              <div className="pricing-impact">
-                {hasDiscount ? (
-                  <div className="d-flex align-items-center">
-                    <span className={`badge ${style.badgeClass} fs-6 me-2`}>
-                      🎉 {discountPercent}% OFF
-                    </span>
-                    <span className="fw-semibold text-success">
-                      {discountPercent === 15 
-                        ? '🌧️ Rainy weather special! All meals 15% cheaper!' 
-                        : '🌤️ Weather discount active! Save 5% on all orders!'
-                      }
-                    </span>
-                  </div>
-                ) : (
-                  <div className="d-flex align-items-center">
-                    <span className="badge bg-light text-dark fs-6 me-2">
-                      ☀️ Standard Pricing
-                    </span>
-                    <span className="text-muted">
-                      Perfect weather for dining! Regular prices apply.
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
+    <div className={`modern-food-banner ${hasDiscount ? 'special-offer' : 'regular-pricing'}`} role="alert">
+      {/* Special Offer Header */}
+      {hasDiscount && (
+        <div className="special-offer-header">
+          <span className="offer-badge">🎉 Special Deal Active!</span>
+        </div>
+      )}
+      
+      {/* Main Banner Content */}
+      <div className="banner-content">
+        <div className="food-icon-container">
+          <div className="food-icon animated">{foodIcon}</div>
+          <div className="floating-food-icons">
+            <span className="floating-icon icon-1">🥘</span>
+            <span className="floating-icon icon-2">🍲</span>
+            <span className="floating-icon icon-3">�</span>
+            <span className="floating-icon icon-4">🥗</span>
           </div>
         </div>
-
-        {/* Right Side - Weather Stats */}
-        <div className="col-md-4 text-end d-none d-md-block">
-          <div className="weather-stats">
-            <div className="row text-center">
-              <div className="col-4">
-                <div className="bg-white rounded p-2 shadow-sm">
-                  <div className="fw-bold text-primary">{currentTemp || Math.round(weather.current.temp_c)}°</div>
-                  <small className="text-muted">Temp</small>
-                </div>
-              </div>
-              <div className="col-4">
-                <div className="bg-white rounded p-2 shadow-sm">
-                  <div className="fw-bold text-info">{weather.current.humidity}%</div>
-                  <small className="text-muted">Humidity</small>
-                </div>
-              </div>
-              <div className="col-4">
-                <div className="bg-white rounded p-2 shadow-sm">
-                  <div className="fw-bold text-warning">{discountPercent}%</div>
-                  <small className="text-muted">Discount</small>
-                </div>
-              </div>
-            </div>
+        
+        <div className="banner-text">
+          <h4 className="banner-title">{mainTitle}</h4>
+          <p className="banner-subtitle">{subtitle}</p>
+          
+          {/* Location and Deal Info */}
+          <div className="banner-info">
+            <span className="location-badge">
+              📍 {currentCity || weather.location?.name || 'Your City'}
+            </span>
+            {hasDiscount && (
+              <span className="deal-badge pulsing">
+                💰 {discountPercent}% OFF All Orders
+              </span>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Enhanced Progress Bar for Discount */}
+      {/* Progress Bar for Discount */}
       {hasDiscount && (
-        <div className="mt-3">
-          <div className="d-flex justify-content-between align-items-center mb-1">
-            <small className="fw-semibold">Weather Discount Applied</small>
-            <small className="badge bg-success">{discountPercent}% OFF</small>
+        <div className="discount-progress">
+          <div className="progress-header">
+            <span className="progress-label">Deal Level</span>
+            <span className="progress-value">{discountPercent}% OFF</span>
           </div>
-          <div className="progress" style={{ height: '8px', borderRadius: '10px' }}>
+          <div className="progress-bar-container">
             <div 
-              className={`progress-bar progress-bar-striped progress-bar-animated ${discountPercent === 15 ? 'bg-success' : 'bg-info'}`}
-              role="progressbar" 
-              style={{ 
-                width: `${(discountPercent / 15) * 100}%`,
-                borderRadius: '10px'
-              }}
-              aria-valuenow={discountPercent}
-              aria-valuemin="0" 
-              aria-valuemax="15"
+              className="progress-bar-fill"
+              style={{ width: `${(discountPercent / 15) * 100}%` }}
             ></div>
           </div>
-          <div className="d-flex justify-content-between mt-1">
-            
-            <small className="text-muted">Maximum (15%)</small>
+          <div className="progress-footer">
+            <span>Standard</span>
+            <span>Maximum Deal</span>
           </div>
         </div>
       )}
-
-
     </div>
   );
 };

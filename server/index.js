@@ -7,15 +7,34 @@ require('dotenv').config();
 
 const app = express();
 const server = createServer(app);
+
+// Environment-based CORS origins
+const getAllowedOrigins = () => {
+  const origins = ["https://mealmatch-frontend.onrender.com"];
+  
+  // Add development origins in development/local environment
+  if (process.env.NODE_ENV !== 'production') {
+    origins.push("http://localhost:3000", "http://127.0.0.1:3000");
+  }
+  
+  return origins;
+};
+
 const io = new Server(server, {
   cors: {
-    origin: "https://mealmatch-frontend.onrender.com",
-    methods: ["GET", "POST"]
+    origin: getAllowedOrigins(),
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
   }
 });
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: getAllowedOrigins(),
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
 app.use(express.json());
 
 // MongoDB connection

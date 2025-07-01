@@ -10,14 +10,15 @@ const Navbar = () => {
 
   // Animate cart count when it changes
   useEffect(() => {
-    if (getTotalItems() > 0) {
+    const totalItems = getTotalItems();
+    if (totalItems > 0) {
       setCartCountClass('animate__animated animate__pulse');
       const timer = setTimeout(() => {
         setCartCountClass('');
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [getTotalItems()]);
+  }, [getTotalItems]);
 
   const handleLogout = () => {
     logout();
@@ -89,15 +90,15 @@ const Navbar = () => {
 
             {/* User Menu */}
             <li className="nav-item dropdown">
-              <a
-                className="nav-link dropdown-toggle"
-                href="#"
-                role="button"
+              <button
+                className="nav-link dropdown-toggle btn btn-link border-0"
+                type="button"
                 data-bs-toggle="dropdown"
+                aria-expanded="false"
               >
                 <i className="bi bi-person-circle me-1"></i>
                 {user?.name || 'User'}
-              </a>
+              </button>
               <ul className="dropdown-menu">
                 <li>
                   <span className="dropdown-item-text">

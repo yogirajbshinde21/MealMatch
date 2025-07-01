@@ -21,14 +21,12 @@ export const CartProvider = ({ children }) => {
   const saveCartData = useCallback((cartData, userId) => {
     if (!userId) return;
     
-    if (userId === 'demo-user-id') {
-      localStorage.setItem(`cart_${userId}`, JSON.stringify(cartData));
-      console.log('Cart saved to localStorage for demo user');
-    } else {
-      cartService.updateCart(userId, cartData).catch(error => {
-        console.warn('Could not sync cart to MongoDB:', error);
-      });
-    }
+    // Always save to localStorage as backup
+    localStorage.setItem(`cart_${userId}`, JSON.stringify(cartData));
+    console.log('Cart saved to localStorage for user:', userId);
+    
+    // Don't automatically sync to MongoDB to avoid 500 errors during every state change
+    // Let individual cart operations handle MongoDB sync explicitly
   }, []);
 
   // Local cart manipulation function
@@ -110,51 +108,45 @@ export const CartProvider = ({ children }) => {
     console.log('CartContext: Loading cart for user:', user.id, user.email);
     setLoading(true);
     try {
-      // For demo users, try localStorage first
-      if (user.id === 'demo-user-id') {
-        console.log('CartContext: Loading cart from localStorage for demo user');
-        const localCart = localStorage.getItem(`cart_${user.id}`);
-        if (localCart) {
-          try {
-            const parsedCart = JSON.parse(localCart);
-            console.log('CartContext: Found cart in localStorage:', parsedCart);
-            setCart(parsedCart);
-          } catch (parseError) {
-            console.error('Error parsing localStorage cart:', parseError);
-            setCart({ items: [] });
-          }
-        } else {
-          console.log('CartContext: No cart found in localStorage, initializing empty cart');
+      // First, always try to load from localStorage as it's faster and more reliable
+      console.log('CartContext: Loading cart from localStorage');
+      const localCart = localStorage.getItem(`cart_${user.id}`);
+      if (localCart) {
+        try {
+          const parsedCart = JSON.parse(localCart);
+          console.log('CartContext: Found cart in localStorage:', parsedCart);
+          setCart(parsedCart);
+        } catch (parseError) {
+          console.error('Error parsing localStorage cart:', parseError);
           setCart({ items: [] });
         }
-        setLoading(false);
-        return;
+      } else {
+        console.log('CartContext: No cart found in localStorage, initializing empty cart');
+        setCart({ items: [] });
       }
 
-      // For real users, load from MongoDB
-      console.log('CartContext: Loading cart from MongoDB for user:', user.id);
-      const response = await cartService.getCart(user.id);
-      console.log('CartContext: Cart service response:', response.data);
-      
-      // Check if we got actual cart data from MongoDB
-      if (response.data?.cart && !response.data?.mockMode) {
-        console.log('CartContext: Loading cart from MongoDB');
-        setCart(response.data.cart);
-      } else {
-        console.log('CartContext: Backend in mock mode or no cart found, initializing empty cart');
-        // Initialize empty cart in MongoDB
-        const emptyCart = { items: [] };
-        setCart(emptyCart);
-        // Try to save empty cart to MongoDB to establish the cart
+      // For real users (not demo), also try to load from MongoDB and sync
+      if (user.id !== 'demo-user-id' && !user.id.startsWith('user-') && !user.id.startsWith('demo-') && !user.id.startsWith('admin-')) {
+        console.log('CartContext: Loading cart from MongoDB for real user:', user.id);
         try {
-          await cartService.updateCart(user.id, emptyCart);
-        } catch (saveError) {
-          console.warn('Could not initialize cart in MongoDB:', saveError);
+          const response = await cartService.getCart(user.id);
+          console.log('CartContext: Cart service response:', response.data);
+          
+          // Check if we got actual cart data from MongoDB
+          if (response.data?.cart && !response.data?.mockMode) {
+            console.log('CartContext: Loading cart from MongoDB');
+            const mongoCart = response.data.cart;
+            setCart(mongoCart);
+            // Also update localStorage with MongoDB data
+            localStorage.setItem(`cart_${user.id}`, JSON.stringify(mongoCart));
+          }
+        } catch (error) {
+          console.warn('Could not load cart from MongoDB, using localStorage:', error);
+          // LocalStorage cart is already loaded above, so we're good
         }
       }
     } catch (error) {
       console.error('Error loading cart:', error);
-      // Initialize empty cart as fallback
       setCart({ items: [] });
     } finally {
       setLoading(false);
@@ -186,37 +178,33 @@ export const CartProvider = ({ children }) => {
     try {
       console.log('CartContext: Adding to cart', { meal, quantity, bargainPrice, weatherDiscount });
       
-      // For demo users, handle cart locally with localStorage
-      if (user.id === 'demo-user-id') {
-        console.log('CartContext: Demo user, handling cart locally');
-        addToLocalCart(meal, quantity, bargainPrice, weatherDiscount);
-        setLoading(false);
-        return;
-      }
-
-      // For real users, try MongoDB first
-      const response = await cartService.addToCart(user.id, {
-        mealId: meal._id,
-        quantity,
-        bargainPrice,
-        weatherDiscount
-      });
-      console.log('CartContext: Cart service response', response);
+      // Always handle cart locally first for immediate UI response
+      addToLocalCart(meal, quantity, bargainPrice, weatherDiscount);
       
-      // Check if backend returned actual cart data
-      if (response.data?.cart && !response.data?.mockMode) {
-        console.log('CartContext: Cart updated in MongoDB');
-        const updatedCart = response.data.cart;
-        setCart(updatedCart);
-      } else {
-        console.log('CartContext: Backend in mock mode, handling locally');
-        // Backend is in mock mode, handle cart locally and try to save to MongoDB
-        addToLocalCart(meal, quantity, bargainPrice, weatherDiscount);
+      // For real users (not demo/mock), also try to sync to MongoDB in background
+      if (user.id !== 'demo-user-id' && !user.id.startsWith('user-') && !user.id.startsWith('demo-') && !user.id.startsWith('admin-')) {
+        try {
+          console.log('CartContext: Syncing to MongoDB for real user');
+          const response = await cartService.addToCart(user.id, {
+            mealId: meal._id,
+            quantity,
+            bargainPrice,
+            weatherDiscount
+          });
+          console.log('CartContext: MongoDB sync successful', response);
+        } catch (error) {
+          console.warn('CartContext: MongoDB sync failed, continuing with local cart:', error);
+          // Continue with local cart - it's already been added above
+        }
       }
     } catch (error) {
       console.error('Error adding to cart:', error);
-      // Fallback to local cart handling
-      addToLocalCart(meal, quantity, bargainPrice, weatherDiscount);
+      // Fallback to local cart handling (likely already done above)
+      try {
+        addToLocalCart(meal, quantity, bargainPrice, weatherDiscount);
+      } catch (localError) {
+        console.error('Failed to add to local cart as well:', localError);
+      }
     } finally {
       setLoading(false);
     }

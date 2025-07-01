@@ -57,6 +57,22 @@ exports.addToCart = async (req, res) => {
       });
     }
 
+    // Validate MongoDB ObjectId format
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      console.log('Invalid user ID format, treating as mock user');
+      return res.json({ 
+        message: 'Item added to cart (invalid user ID - mock mode)', 
+        success: true,
+        mockMode: true
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(mealId)) {
+      console.log('Invalid meal ID format');
+      return res.status(400).json({ message: 'Invalid meal ID format' });
+    }
+
     // Check if meal exists (for real database users)
     const meal = await Meal.findById(mealId);
     if (!meal) {
@@ -128,9 +144,9 @@ exports.addToCart = async (req, res) => {
 exports.updateCart = async (req, res) => {
   try {
     const { userId } = req.params;
-    const { items } = req.body;
+    const cartData = req.body;
 
-    console.log('Update cart request:', { userId, items: items?.length });
+    console.log('Update cart request:', { userId, cartData: typeof cartData });
 
     // For demo/mock users, return success and let frontend handle
     if (userId.startsWith('user-') || userId.startsWith('demo-') || userId.startsWith('admin-') || userId === 'demo-user-id' || userId === 'admin-user-id') {
@@ -142,13 +158,35 @@ exports.updateCart = async (req, res) => {
       });
     }
 
+    // Validate MongoDB ObjectId format
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      console.log('Invalid user ID format in updateCart, treating as mock user');
+      return res.json({ 
+        message: 'Cart updated (invalid user ID - mock mode)', 
+        success: true,
+        mockMode: true
+      });
+    }
+
     let cart = await Cart.findOne({ user: userId });
     if (!cart) {
       cart = new Cart({ user: userId, items: [] });
     }
 
+    // Handle different data structures
+    let items = [];
+    if (cartData.items) {
+      items = cartData.items;
+    } else if (Array.isArray(cartData)) {
+      items = cartData;
+    } else {
+      console.log('No items found in update cart request');
+      items = [];
+    }
+
     // Update cart data
-    cart.items = items || [];
+    cart.items = items;
 
     await cart.save();
 

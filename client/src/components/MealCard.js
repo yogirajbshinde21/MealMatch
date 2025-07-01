@@ -9,14 +9,10 @@ const MealCard = ({ meal, showBargain = true }) => {
   const { applyWeatherPricing, hasDiscount, discountPercent } = useWeather();
 
   const handleAddToCart = async () => {
-    // Pass weather discount info to maintain consistent pricing in cart
-    const weatherInfo = hasDiscount ? {
-      discountPercent: discountPercent,
-      finalPrice: Math.round(finalPrice),
-      originalPrice: basePrice
-    } : null;
+    // Pass weather discount percentage as a number for backend compatibility
+    const weatherDiscountPercent = hasDiscount ? discountPercent : null;
     
-    await addToCart(meal, 1, null, weatherInfo);
+    await addToCart(meal, 1, null, weatherDiscountPercent);
   };
 
   const handleBargainSuccess = async (bargainPrice) => {

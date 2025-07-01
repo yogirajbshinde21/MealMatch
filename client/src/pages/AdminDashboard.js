@@ -77,7 +77,7 @@ const AdminDashboard = () => {
   }, [user]);
 
   // const initializeSocket = () => {
-  //   const newSocket = io('https://mealmatch-backend.onrender.com/api');
+  //   const newSocket = io('https://mealmatch-backend.onrender.com');
   //   setSocket(newSocket);
     
   //   // Join admin room for notifications
