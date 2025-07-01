@@ -10,12 +10,13 @@ const server = createServer(app);
 
 // Environment-based CORS origins
 const getAllowedOrigins = () => {
-  const origins = ["https://mealmatch-frontend.onrender.com"];
-  
-  // Add development origins in development/local environment
-  if (process.env.NODE_ENV !== 'production') {
-    origins.push("http://localhost:3000", "http://127.0.0.1:3000");
-  }
+  const origins = [
+    "https://mealmatch-frontend.onrender.com",
+    "http://localhost:3000", 
+    "http://127.0.0.1:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3001"
+  ];
   
   return origins;
 };
@@ -23,19 +24,59 @@ const getAllowedOrigins = () => {
 const io = new Server(server, {
   cors: {
     origin: getAllowedOrigins(),
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization", "x-requested-with"],
+    optionsSuccessStatus: 200
   }
 });
 
-// Middleware
+// Enhanced CORS middleware
 app.use(cors({
-  origin: getAllowedOrigins(),
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = getAllowedOrigins();
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: [
+    "Origin",
+    "X-Requested-With", 
+    "Content-Type", 
+    "Accept",
+    "Authorization",
+    "Cache-Control",
+    "Pragma"
+  ],
+  credentials: true,
+  optionsSuccessStatus: 200 // For legacy browser support
 }));
-app.use(express.json());
+
+// Handle preflight requests explicitly
+app.options('*', (req, res) => {
+  const allowedOrigins = getAllowedOrigins();
+  const origin = req.headers.origin;
+  
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, Pragma');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Max-Age', '86400'); // 24 hours
+  res.sendStatus(200);
+});
+
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // MongoDB connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/mealmatch';

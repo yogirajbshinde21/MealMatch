@@ -175,9 +175,13 @@ const WeatherBanner = () => {
             <span className="location-badge">
               📍 {currentCity || weather.location?.name || 'Your City'}
             </span>
-            {/* Simple Weather Condition */}
+            {/* Weather Condition Display */}
             <span className="weather-condition-badge">
               {getWeatherIcon()} {currentCondition || weather.current?.condition?.text || 'Light Rain'}
+            </span>
+            {/* Temperature Display */}
+            <span className="temperature-badge">
+              🌡️ {weather.current?.temp_c || 24}°C
             </span>
             {hasDiscount && (
               <span className="deal-badge pulsing">
