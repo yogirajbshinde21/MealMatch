@@ -12,6 +12,27 @@ const WeatherBanner = () => {
     currentCondition
   } = useWeather();
 
+  // Get simple weather icon for condition badge
+  const getWeatherIcon = () => {
+    if (!weather?.current) return '🌦️';
+    
+    const condition = currentCondition || weather.current.condition.text.toLowerCase();
+    
+    if (condition.includes('rain') || condition.includes('drizzle')) {
+      return '🌧️';
+    } else if (condition.includes('snow') || condition.includes('blizzard')) {
+      return '❄️';
+    } else if (condition.includes('sunny') || condition.includes('clear')) {
+      return '☀️';
+    } else if (condition.includes('cloud') || condition.includes('overcast')) {
+      return '☁️';
+    } else if (condition.includes('thunder') || condition.includes('storm')) {
+      return '⛈️';
+    } else {
+      return '🌤️';
+    }
+  };
+
   // Get food-themed icon based on weather condition
   const getFoodWeatherIcon = () => {
     if (!weather?.current) return '🍽️';
@@ -153,6 +174,10 @@ const WeatherBanner = () => {
           <div className="banner-info">
             <span className="location-badge">
               📍 {currentCity || weather.location?.name || 'Your City'}
+            </span>
+            {/* Simple Weather Condition */}
+            <span className="weather-condition-badge">
+              {getWeatherIcon()} {currentCondition || weather.current?.condition?.text || 'Light Rain'}
             </span>
             {hasDiscount && (
               <span className="deal-badge pulsing">

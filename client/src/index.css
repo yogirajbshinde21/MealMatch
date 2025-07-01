@@ -2291,6 +2291,26 @@ code {
   border: 1px solid rgba(52, 152, 219, 0.2);
 }
 
+.weather-condition-badge {
+  background: rgba(46, 204, 113, 0.1);
+  color: #2ecc71;
+  padding: 0.4rem 0.8rem;
+  border-radius: 15px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid rgba(46, 204, 113, 0.2);
+  margin-left: 0.5rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .weather-condition-badge {
+    margin-left: 0;
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+  }
+}
+
 .deal-badge {
   background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
   color: white;
