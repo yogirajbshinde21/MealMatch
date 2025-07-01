@@ -49,7 +49,7 @@ router.get('/socket-test', (req, res) => {
   res.json({
     socketIO: {
       enabled: true,
-      endpoint: 'ws://localhost:5000',
+      endpoint: process.env.NODE_ENV === 'production' ? 'wss://mealmatch-backend.onrender.com' : 'ws://localhost:5000',
       features: ['bargain-negotiations', 'real-time-updates']
     }
   });

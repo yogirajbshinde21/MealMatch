@@ -20,7 +20,8 @@ const BargainForm = ({ meal, onClose, onSuccess }) => {
 
   useEffect(() => {
     // Initialize socket connection for real-time bargaining
-    const newSocket = io('http://localhost:5000');
+    const socketUrl = process.env.REACT_APP_API_BASE_URL?.replace('/api', '') || 'http://localhost:5000';
+    const newSocket = io(socketUrl);
     setSocket(newSocket);
 
     // Join user room for bargain updates

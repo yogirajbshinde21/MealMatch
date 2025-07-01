@@ -176,8 +176,8 @@ npm install
 npm start
 
 # 6. Access application
-🌐 Frontend: http://localhost:3000
-🔧 Backend API: http://localhost:5000
+🌐 Frontend: http://localhost:3000 (development) / https://mealmatch-frontend.onrender.com (production)
+🔧 Backend API: http://localhost:5000 (development) / https://mealmatch-backend.onrender.com (production)
 ```
 
 ### 🔐 **Environment Variables Setup**
@@ -189,7 +189,7 @@ REACT_APP_WEATHER_API_KEY=your_weather_api_key_here
 REACT_APP_WEATHER_API_BASE_URL=https://api.weatherapi.com/v1/current.json
 
 # API Base URL
-REACT_APP_API_BASE_URL=http://localhost:5000/api
+REACT_APP_API_BASE_URL=https://mealmatch-backend.onrender.com/api
 ```
 
 #### **Server (.env)**
@@ -205,7 +205,7 @@ NODE_ENV=development
 JWT_SECRET=your_jwt_secret_here
 
 # CORS Configuration
-CLIENT_URL=http://localhost:3000
+CLIENT_URL=https://mealmatch-frontend.onrender.com
 ```
 
 #### **Getting Weather API Key**

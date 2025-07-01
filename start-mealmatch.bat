@@ -17,8 +17,12 @@ start "MealMatch Frontend" cmd /k "npm start"
 
 echo.
 echo Both servers are starting...
-echo Backend: http://localhost:5000
-echo Frontend: http://localhost:3000
+echo Backend: http://localhost:5000 (local development)
+echo Frontend: http://localhost:3000 (local development)
+echo.
+echo For production deployment, use:
+echo Backend: https://mealmatch-backend.onrender.com
+echo Frontend: https://mealmatch-frontend.onrender.com
 echo.
 echo Press any key to exit this window...
 pause >nul

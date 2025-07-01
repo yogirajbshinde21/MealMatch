@@ -19,7 +19,7 @@ const CartTestPage = () => {
 
       // Test 1: Health check
       setResult(prev => prev + 'Test 1: Checking server health...\n');
-      const healthResponse = await fetch('http://localhost:5000/api/health');
+      const healthResponse = await fetch('https://mealmatch-backend.onrender.com/api/health');
       const healthData = await healthResponse.json();
       setResult(prev => prev + `✅ Server is ${healthData.status}\n\n`);
 

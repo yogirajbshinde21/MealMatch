@@ -9,7 +9,7 @@
     "client": "cd client && npm start",
     "install-all": "npm install && cd client && npm install && cd ../server && npm install",
     "setup": "npm run install-all && cd server && npm run seed",
-    "test-api": "cd server && curl http://localhost:5000/api/health || echo 'Server not running'"
+    "test-api": "cd server && curl https://mealmatch-backend.onrender.com/api/health || echo 'Server not running'"
   },
   "keywords": ["food delivery", "react", "node", "mongodb", "socket.io"],
   "author": "MealMatch Team",
