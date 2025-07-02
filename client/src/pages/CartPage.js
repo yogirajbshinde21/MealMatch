@@ -6,9 +6,9 @@ import { useWeather } from '../context/WeatherContext';
 import { orderService } from '../services/api';
 
 const CartPage = () => {
-  const { cart, updateCartItem, removeFromCart, clearCart, getTotalPrice, loading } = useCart();
+  const { cart, updateCartItem, removeFromCart, clearCart, getTotalPrice, getTotalSavings, loading } = useCart();
   const { user } = useAuth();
-  const { applyWeatherPricing } = useWeather();
+  const { applyWeatherPricing, discountPercent } = useWeather();
   const navigate = useNavigate();
   
   const [isProcessing, setIsProcessing] = useState(false);
@@ -54,13 +54,30 @@ const CartPage = () => {
       // Prepare order data
       const orderData = {
         userId: user.id,
-        items: cart.items.map(item => ({
-          meal: item.meal._id,
-          quantity: item.quantity,
-          price: item.bargainPrice || item.meal.price,
-          bargainPrice: item.bargainPrice || null
-        })),
-        totalAmount: finalAmount,
+        items: cart.items.map(item => {
+          // Calculate the actual price to charge using stored weather discount
+          let itemPrice = item.meal.price;
+          if (item.bargainPrice) {
+            itemPrice = item.bargainPrice;
+          } else if (item.weatherDiscount && item.weatherDiscount > 0) {
+            // Apply stored weather discount
+            const discountAmount = (item.meal.price * item.weatherDiscount) / 100;
+            itemPrice = item.meal.price - discountAmount;
+          } else {
+            // Fallback to current weather pricing
+            const weatherPricing = applyWeatherPricing(item.meal.price);
+            itemPrice = weatherPricing.finalPrice;
+          }
+          
+          return {
+            meal: item.meal._id,
+            quantity: item.quantity,
+            price: itemPrice, // Use the discounted price
+            bargainPrice: item.bargainPrice || null,
+            weatherDiscount: item.weatherDiscount || null
+          };
+        }),
+        totalAmount: totalAmount + deliveryFee, // Total including delivery fee
         deliveryFee: deliveryFee,
         deliveryAddress: {
           street: user.address?.street || '123 Default Street',
@@ -132,8 +149,7 @@ const CartPage = () => {
   };
 
   const deliveryFee = 50;
-  const totalAmount = getTotalPrice();
-  const finalAmount = totalAmount + deliveryFee;
+  const totalAmount = getTotalPrice(applyWeatherPricing); // Pass weather pricing function
 
   if (loading) {
     return (
@@ -230,11 +246,24 @@ const CartPage = () => {
                       {/* Price */}
                       <div className="col-md-2 text-center">
                         {(() => {
-                          // Calculate current weather-adjusted price for display
+                          // Calculate current price for display using stored weather discount
                           const basePrice = item.meal.price;
-                          const weatherPricing = applyWeatherPricing(basePrice);
-                          const currentPrice = item.bargainPrice || weatherPricing.finalPrice;
-                          const showWeatherDiscount = !item.bargainPrice && weatherPricing.hasDiscount;
+                          let currentPrice = basePrice;
+                          let showWeatherDiscount = false;
+                          
+                          if (item.bargainPrice) {
+                            currentPrice = item.bargainPrice;
+                          } else if (item.weatherDiscount && item.weatherDiscount > 0) {
+                            // Use stored weather discount from cart item
+                            const discountAmount = (basePrice * item.weatherDiscount) / 100;
+                            currentPrice = basePrice - discountAmount;
+                            showWeatherDiscount = true;
+                          } else {
+                            // Fallback to current weather pricing
+                            const weatherPricing = applyWeatherPricing(basePrice);
+                            currentPrice = weatherPricing.finalPrice;
+                            showWeatherDiscount = weatherPricing.hasDiscount;
+                          }
                           
                           return (
                             <div>
@@ -254,7 +283,9 @@ const CartPage = () => {
                                 <small className="text-success d-block">Bargain Price</small>
                               )}
                               {showWeatherDiscount && (
-                                <small className="text-info d-block">Weather Discount</small>
+                                <small className="text-info d-block">
+                                  Weather Discount ({item.weatherDiscount || discountPercent}%)
+                                </small>
                               )}
                             </div>
                           );
@@ -285,7 +316,25 @@ const CartPage = () => {
                       {/* Total & Remove */}
                       <div className="col-md-2 text-end">
                         <div className="fw-bold price-tag primary-text mb-2">
-                          ₹{((item.bargainPrice || item.meal.price) * item.quantity).toFixed(0)}
+                          ₹{(() => {
+                            // Calculate the final item price using stored weather discount
+                            let itemPrice = item.meal.price;
+                            if (item.bargainPrice) {
+                              itemPrice = item.bargainPrice;
+                            } else if (item.weatherDiscount && item.weatherDiscount > 0) {
+                              // Use stored weather discount
+                              const discountAmount = (item.meal.price * item.weatherDiscount) / 100;
+                              itemPrice = item.meal.price - discountAmount;
+                            } else {
+                              // Fallback to current weather pricing
+                              const weatherPricing = applyWeatherPricing(item.meal.price);
+                              itemPrice = weatherPricing.finalPrice;
+                            }
+                            // Round the unit price first, then multiply by quantity
+                            // This ensures consistency with the displayed unit price
+                            const roundedUnitPrice = Math.round(itemPrice);
+                            return roundedUnitPrice * item.quantity;
+                          })()}
                         </div>
                         <button
                           className="btn btn-outline-danger btn-sm"
@@ -330,20 +379,31 @@ const CartPage = () => {
                 </div>
 
                 {/* Savings Summary */}
-                {cart.items.some(item => item.bargainPrice) && (
-                  <div className="mt-3 p-2 bg-success bg-opacity-10 rounded">
-                    <small className="text-success fw-bold">
-                      <i className="bi bi-currency-dollar me-1"></i>
-                      You saved ₹
-                      {cart.items.reduce((savings, item) => {
-                        if (item.bargainPrice && item.bargainPrice < item.meal.price) {
-                          return savings + ((item.meal.price - item.bargainPrice) * item.quantity);
-                        }
-                        return savings;
-                      }, 0).toFixed(0)} through bargaining!
-                    </small>
-                  </div>
-                )}
+                {(() => {
+                  const totalSavings = getTotalSavings(applyWeatherPricing);
+                  const hasBargainSavings = cart.items.some(item => item.bargainPrice);
+                  const hasWeatherSavings = cart.items.some(item => 
+                    (item.weatherDiscount && item.weatherDiscount > 0) || 
+                    (!item.bargainPrice && !item.weatherDiscount && applyWeatherPricing(item.meal.price).hasDiscount)
+                  );
+                  
+                  if (totalSavings > 0) {
+                    return (
+                      <div className="mt-3 p-2 bg-success bg-opacity-10 rounded">
+                        <small className="text-success fw-bold">
+                          <i className="bi bi-currency-dollar me-1"></i>
+                          You saved ₹{Math.round(totalSavings)} 
+                          {hasBargainSavings && hasWeatherSavings 
+                            ? ' through bargaining and weather discounts!' 
+                            : hasBargainSavings 
+                            ? ' through bargaining!' 
+                            : ' through weather discounts!'}
+                        </small>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
 
                 {/* Address Section */}
                 <div className="mt-4">

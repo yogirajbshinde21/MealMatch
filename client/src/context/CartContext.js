@@ -315,11 +315,57 @@ export const CartProvider = ({ children }) => {
     }
   }, [user]);
 
-  const getTotalPrice = () => {
+  const getTotalPrice = (applyWeatherPricing) => {
     if (!cart || !cart.items) return 0;
     return cart.items.reduce((total, item) => {
-      const price = item.bargainPrice || item.meal.price;
-      return total + (price * item.quantity);
+      let price = item.meal.price; // Start with base price
+      
+      // Apply bargain price if available (takes priority over weather discount)
+      if (item.bargainPrice) {
+        price = item.bargainPrice;
+      } else if (item.weatherDiscount && item.weatherDiscount > 0) {
+        // Apply stored weather discount from cart item
+        const discountAmount = (item.meal.price * item.weatherDiscount) / 100;
+        price = item.meal.price - discountAmount;
+      } else if (applyWeatherPricing) {
+        // Fallback to current weather pricing if no stored discount
+        const weatherPricing = applyWeatherPricing(item.meal.price);
+        price = weatherPricing.finalPrice;
+      }
+      
+      // Round the unit price first, then multiply by quantity for consistency
+      // This ensures the total matches what users see as unit price × quantity
+      const roundedUnitPrice = Math.round(price);
+      const itemTotal = roundedUnitPrice * item.quantity;
+      return total + itemTotal;
+    }, 0);
+  };
+
+  const getTotalSavings = (applyWeatherPricing) => {
+    if (!cart || !cart.items) return 0;
+    return cart.items.reduce((savings, item) => {
+      let savedAmount = 0;
+      const basePrice = item.meal.price;
+      
+      if (item.bargainPrice && item.bargainPrice < basePrice) {
+        // Savings from bargaining - use actual prices for savings calculation
+        savedAmount = (basePrice - item.bargainPrice) * item.quantity;
+      } else if (item.weatherDiscount && item.weatherDiscount > 0) {
+        // Savings from stored weather discount
+        const discountAmount = (basePrice * item.weatherDiscount) / 100;
+        const discountedPrice = basePrice - discountAmount;
+        const roundedDiscountedPrice = Math.round(discountedPrice);
+        // Calculate savings based on rounded prices for consistency
+        savedAmount = (basePrice - roundedDiscountedPrice) * item.quantity;
+      } else if (!item.bargainPrice && applyWeatherPricing) {
+        // Fallback to current weather discount if no stored discount
+        const weatherPricing = applyWeatherPricing(basePrice);
+        if (weatherPricing.hasDiscount) {
+          const roundedDiscountedPrice = Math.round(weatherPricing.finalPrice);
+          savedAmount = (basePrice - roundedDiscountedPrice) * item.quantity;
+        }
+      }
+      return savings + savedAmount;
     }, 0);
   };
 
@@ -337,6 +383,7 @@ export const CartProvider = ({ children }) => {
     clearCart,
     getTotalPrice,
     getTotalItems,
+    getTotalSavings,
     loadCart,
     refreshCart: loadCart // Alias for external refresh calls
   };

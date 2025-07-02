@@ -149,7 +149,7 @@ const seedDatabase = async () => {
         description: 'Fragrant basmati rice with aromatic spices and tender meat',
         price: 399,
         category: 'Main Course',
-        image: 'https://images.unsplash.com/photo-1563379091339-03246963d96c?w=400&h=300&fit=crop&q=80',
+        image: 'https://images.unsplash.com/photo-1697155406055-2db32d47ca07?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
         restaurant: spiceParadise._id,
         rating: 4.6,
         totalReviews: 156,

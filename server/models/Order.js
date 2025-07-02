@@ -13,7 +13,9 @@ const orderItemSchema = new mongoose.Schema({
   price: {
     type: Number,
     required: true
-  }
+  },
+  bargainPrice: Number, // if item was purchased through bargain
+  weatherDiscount: Number // weather-based discount percentage applied
 });
 
 const orderSchema = new mongoose.Schema({

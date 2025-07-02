@@ -147,12 +147,24 @@ exports.createOrderFromCart = async (req, res) => {
     // Calculate total amount
     let totalAmount = 0;
     const orderItems = cart.items.map(item => {
-      const price = item.bargainPrice || item.meal.price;
+      let price = item.meal.price; // Start with base price
+      
+      // Apply bargain price if available (takes priority)
+      if (item.bargainPrice) {
+        price = item.bargainPrice;
+      } else if (item.weatherDiscount && item.weatherDiscount > 0) {
+        // Apply weather discount if no bargain price
+        const discountAmount = (item.meal.price * item.weatherDiscount) / 100;
+        price = item.meal.price - discountAmount;
+      }
+      
       totalAmount += price * item.quantity;
       return {
         meal: item.meal._id,
         quantity: item.quantity,
-        price: price
+        price: price,
+        bargainPrice: item.bargainPrice || null,
+        weatherDiscount: item.weatherDiscount || null
       };
     });
 
