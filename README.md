@@ -16,7 +16,9 @@
 
 ## 🎬 Demo Video
 
-*[Space reserved for demo video - Upload your showcase video here]*
+
+https://github.com/user-attachments/assets/1a60a309-a80a-4d36-99f9-e06e03404658
+
 
 ---
 
