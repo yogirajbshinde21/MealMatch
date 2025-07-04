@@ -11,7 +11,7 @@ const Order = require('./models/Order');
 async function testCounterResponse() {
   try {
     // Connect to MongoDB
-    const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://yogirajbshinde21:Guru2109@cluster0.ttx13or.mongodb.net/mealmatch';
+    const MONGODB_URI = process.env.MONGODB_URI;
     await mongoose.connect(MONGODB_URI);
     console.log('✅ Connected to MongoDB');
 

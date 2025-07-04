@@ -10,6 +10,7 @@ node_modules
 
 # Build outputs
 /server/dist
+/server/testBargain.js
 
 # Logs
 *.log
